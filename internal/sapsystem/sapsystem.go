@@ -41,6 +41,7 @@ type SAPSystemsMap map[string]*SAPSystem
 // A SAPSystem in this context is a SAP installation under one SID.
 // It will have application or database type, mutually exclusive
 // The Id parameter is not yet implemented
+// SAPSystem is the structure that the Agent will send to the data collector
 type SAPSystem struct {
 	//Id         string                `mapstructure:"id,omitempty"`
 	SID       string                  `mapstructure:"sid,omitempty"`
