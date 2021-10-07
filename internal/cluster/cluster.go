@@ -25,11 +25,12 @@ const (
 	clusterNameWordCount   int    = 1
 )
 
+// Cluster is the structure that the Agent will send to the data collector
 type Cluster struct {
 	Cib    cib.Root    `mapstructure:"cib,omitempty"`
 	Crmmon crmmon.Root `mapstructure:"crmmon,omitempty"`
 	SBD    SBD         `mapstructure:"sbd,omitempty"`
-	Id     string      `mapstructure:"id"`
+	Id     string      `mapstructure:"id" json:"id" binding:"required"`
 	Name   string      `mapstructure:"name"`
 }
 

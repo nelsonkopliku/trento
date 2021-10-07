@@ -30,6 +30,7 @@ require (
 	github.com/vektra/mockery/v2 v2.9.0
 	golang.org/x/sys v0.0.0-20210809222454-d867a43fc93e // indirect
 	golang.org/x/tools v0.1.5 // indirect
+	gorm.io/datatypes v1.0.2
 	gorm.io/driver/postgres v1.1.2
 	gorm.io/gorm v1.21.15
 )

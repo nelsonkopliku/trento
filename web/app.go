@@ -19,6 +19,7 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
+	dataPipelineServices "github.com/trento-project/trento/data_pipeline/services"
 	"github.com/trento-project/trento/internal/consul"
 	"github.com/trento-project/trento/web/models"
 	"github.com/trento-project/trento/web/services"
@@ -52,6 +53,7 @@ type Dependencies struct {
 	hostsService         services.HostsService
 	sapSystemsService    services.SAPSystemsService
 	tagsService          services.TagsService
+	collectorService     dataPipelineServices.CollectorService
 }
 
 func DefaultDependencies() Dependencies {
@@ -79,9 +81,11 @@ func DefaultDependencies() Dependencies {
 	hostsService := services.NewHostsService(consulClient)
 	sapSystemsService := services.NewSAPSystemsService(consulClient)
 
+	collectorService := dataPipelineServices.NewCollectorService(db, struct{}{})
 	return Dependencies{
 		consulClient, webEngine, collectorEngine, store,
 		checksService, subscriptionsService, hostsService, sapSystemsService, tagsService,
+		collectorService,
 	}
 }
 
@@ -104,7 +108,7 @@ func InitDB() (*gorm.DB, error) {
 }
 
 func MigrateDB(db *gorm.DB) error {
-	err := db.AutoMigrate(models.Tag{})
+	err := db.AutoMigrate(models.Tag{}, dataPipelineServices.DataCollectedEvent{})
 	if err != nil {
 		return err
 	}
@@ -172,7 +176,7 @@ func NewAppWithDeps(host string, port int, deps Dependencies) (*App, error) {
 	}
 
 	collectorEngine := deps.collectorEngine
-	collectorEngine.POST("/api/collector", ApiPingHandler)
+	collectorEngine.POST("/api/collect_data", ApiCollectDataHandler(deps.collectorService))
 
 	return app, nil
 }
