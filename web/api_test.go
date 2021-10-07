@@ -54,7 +54,7 @@ func TestApiListTag(t *testing.T) {
 
 	resp := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/tags", nil)
-	app.ServeHTTP(resp, req)
+	app.webEngine.ServeHTTP(resp, req)
 
 	expectedBody, _ := json.Marshal(tags)
 	assert.Equal(t, 200, resp.Code)
@@ -62,7 +62,7 @@ func TestApiListTag(t *testing.T) {
 
 	resp = httptest.NewRecorder()
 	req, _ = http.NewRequest("GET", "/api/tags?resource_type=hosts", nil)
-	app.ServeHTTP(resp, req)
+	app.webEngine.ServeHTTP(resp, req)
 
 	expectedBody, _ = json.Marshal([]string{
 		"tag4",
@@ -74,7 +74,7 @@ func TestApiListTag(t *testing.T) {
 
 	resp = httptest.NewRecorder()
 	req, _ = http.NewRequest("GET", "/api/tags?resource_type=sapsystems", nil)
-	app.ServeHTTP(resp, req)
+	app.webEngine.ServeHTTP(resp, req)
 
 	expectedBody, _ = json.Marshal([]string{})
 	assert.Equal(t, 200, resp.Code)
@@ -119,7 +119,7 @@ func TestApiHostCreateTagHandler(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	app.ServeHTTP(resp, req)
+	app.webEngine.ServeHTTP(resp, req)
 
 	expectedBody, _ := json.Marshal(gin.H{
 		"tag": "cool_rabbit",
@@ -143,7 +143,7 @@ func TestApiHostCreateTagHandler404(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	app.ServeHTTP(resp, req)
+	app.webEngine.ServeHTTP(resp, req)
 
 	assert.Equal(t, 404, resp.Code)
 }
@@ -163,7 +163,7 @@ func TestApiHostCreateTagHandler400(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	app.ServeHTTP(resp, req)
+	app.webEngine.ServeHTTP(resp, req)
 
 	assert.Equal(t, 400, resp.Code)
 }
@@ -191,7 +191,7 @@ func TestApiHostCreateTagHandler500(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	app.ServeHTTP(resp, req)
+	app.webEngine.ServeHTTP(resp, req)
 
 	assert.Equal(t, 500, resp.Code)
 }
@@ -210,7 +210,7 @@ func TestApiHostDeleteTagHandler(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	app.ServeHTTP(resp, req)
+	app.webEngine.ServeHTTP(resp, req)
 
 	assert.Equal(t, 204, resp.Code)
 }
@@ -229,7 +229,7 @@ func TestApiHostDeleteTagHandler404(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	app.ServeHTTP(resp, req)
+	app.webEngine.ServeHTTP(resp, req)
 
 	assert.Equal(t, 404, resp.Code)
 }
@@ -256,7 +256,7 @@ func TestApiHostDeleteTagHandler500(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	app.ServeHTTP(resp, req)
+	app.webEngine.ServeHTTP(resp, req)
 
 	assert.Equal(t, 500, resp.Code)
 }
@@ -298,7 +298,7 @@ func TestApiClusterCreateTagHandler(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	app.ServeHTTP(resp, req)
+	app.webEngine.ServeHTTP(resp, req)
 
 	expectedBody, _ := json.Marshal(gin.H{
 		"tag": "cool_rabbit",
@@ -322,7 +322,7 @@ func TestApiClusterCreateTagHandler404(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	app.ServeHTTP(resp, req)
+	app.webEngine.ServeHTTP(resp, req)
 
 	assert.Equal(t, 404, resp.Code)
 }
@@ -342,7 +342,7 @@ func TestApiClusterCreateTagHandler400(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	app.ServeHTTP(resp, req)
+	app.webEngine.ServeHTTP(resp, req)
 
 	assert.Equal(t, 400, resp.Code)
 }
@@ -370,7 +370,7 @@ func TestApiClusterCreateTagHandler500(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	app.ServeHTTP(resp, req)
+	app.webEngine.ServeHTTP(resp, req)
 
 	assert.Equal(t, 500, resp.Code)
 }
@@ -389,7 +389,7 @@ func TestApiClusterDeleteTagHandler(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	app.ServeHTTP(resp, req)
+	app.webEngine.ServeHTTP(resp, req)
 
 	assert.Equal(t, 204, resp.Code)
 }
@@ -408,7 +408,7 @@ func TestApiClusterDeleteTagHandler404(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	app.ServeHTTP(resp, req)
+	app.webEngine.ServeHTTP(resp, req)
 
 	assert.Equal(t, 404, resp.Code)
 }
@@ -435,7 +435,7 @@ func TestApiClusterDeleteTagHandler500(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	app.ServeHTTP(resp, req)
+	app.webEngine.ServeHTTP(resp, req)
 
 	assert.Equal(t, 500, resp.Code)
 }
@@ -491,7 +491,7 @@ func TestApiSAPSystemCreateTagHandler(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	app.ServeHTTP(resp, req)
+	app.webEngine.ServeHTTP(resp, req)
 
 	expectedBody, _ := json.Marshal(gin.H{
 		"tag": "cool_rabbit",
@@ -515,7 +515,7 @@ func TestApiSAPSystemCreateTagHandler404(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	app.ServeHTTP(resp, req)
+	app.webEngine.ServeHTTP(resp, req)
 
 	assert.Equal(t, 404, resp.Code)
 }
@@ -535,7 +535,7 @@ func TestApiSAPSystemCreateTagHandler400(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	app.ServeHTTP(resp, req)
+	app.webEngine.ServeHTTP(resp, req)
 
 	assert.Equal(t, 400, resp.Code)
 }
@@ -563,7 +563,7 @@ func TestApiSAPSystemCreateTagHandler500(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	app.ServeHTTP(resp, req)
+	app.webEngine.ServeHTTP(resp, req)
 
 	assert.Equal(t, 500, resp.Code)
 }
@@ -582,7 +582,7 @@ func TestApiSAPSystemDeleteTagHandler(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	app.ServeHTTP(resp, req)
+	app.webEngine.ServeHTTP(resp, req)
 
 	assert.Equal(t, 204, resp.Code)
 }
@@ -601,7 +601,7 @@ func TestApiSAPSystemDeleteTagHandler404(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	app.ServeHTTP(resp, req)
+	app.webEngine.ServeHTTP(resp, req)
 
 	assert.Equal(t, 404, resp.Code)
 }
@@ -628,7 +628,7 @@ func TestApiSAPSystemDeleteTagHandler500(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	app.ServeHTTP(resp, req)
+	app.webEngine.ServeHTTP(resp, req)
 
 	assert.Equal(t, 500, resp.Code)
 }

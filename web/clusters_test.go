@@ -533,7 +533,7 @@ func TestClustersListHandler(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	app.ServeHTTP(resp, req)
+	app.webEngine.ServeHTTP(resp, req)
 
 	consulInst.AssertExpectations(t)
 	checksMocks.AssertExpectations(t)
@@ -628,7 +628,7 @@ func TestClusterHandlerHANA(t *testing.T) {
 	}
 	req.Header.Set("Accept", "text/html")
 
-	app.ServeHTTP(resp, req)
+	app.webEngine.ServeHTTP(resp, req)
 
 	consulInst.AssertExpectations(t)
 	kv.AssertExpectations(t)
@@ -750,7 +750,7 @@ func TestClusterHandlerUnreachableNodes(t *testing.T) {
 	}
 	req.Header.Set("Accept", "text/html")
 
-	app.ServeHTTP(resp, req)
+	app.webEngine.ServeHTTP(resp, req)
 
 	consulInst.AssertExpectations(t)
 	kv.AssertExpectations(t)
@@ -836,7 +836,7 @@ func TestClusterHandlerAlert(t *testing.T) {
 	}
 	req.Header.Set("Accept", "text/html")
 
-	app.ServeHTTP(resp, req)
+	app.webEngine.ServeHTTP(resp, req)
 
 	consulInst.AssertExpectations(t)
 	kv.AssertExpectations(t)
@@ -890,7 +890,7 @@ func TestClusterHandlerGeneric(t *testing.T) {
 	}
 	req.Header.Set("Accept", "text/html")
 
-	app.ServeHTTP(resp, req)
+	app.webEngine.ServeHTTP(resp, req)
 
 	assert.NoError(t, err)
 	assert.Equal(t, 200, resp.Code)
@@ -925,7 +925,7 @@ func TestClusterHandler404Error(t *testing.T) {
 	}
 	req.Header.Set("Accept", "text/html")
 
-	app.ServeHTTP(resp, req)
+	app.webEngine.ServeHTTP(resp, req)
 
 	assert.NoError(t, err)
 	assert.Equal(t, 404, resp.Code)
@@ -971,7 +971,7 @@ func TestSaveChecksHandler(t *testing.T) {
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
 
-	app.ServeHTTP(resp, req)
+	app.webEngine.ServeHTTP(resp, req)
 
 	assert.NoError(t, err)
 	assert.Equal(t, 302, resp.Code)

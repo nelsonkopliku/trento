@@ -75,7 +75,7 @@ func TestChecksCatalogHandler(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	app.ServeHTTP(resp, req)
+	app.webEngine.ServeHTTP(resp, req)
 
 	responseBody := minifyHtml(resp.Body.String())
 
@@ -115,7 +115,7 @@ func TestChecksCatalogHandlerError(t *testing.T) {
 	}
 	req.Header.Set("Accept", "text/html")
 
-	app.ServeHTTP(resp, req)
+	app.webEngine.ServeHTTP(resp, req)
 
 	responseBody := minifyHtml(resp.Body.String())
 

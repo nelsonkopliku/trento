@@ -35,7 +35,7 @@ func TestAboutHandlerPremium(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	app.ServeHTTP(resp, req)
+	app.webEngine.ServeHTTP(resp, req)
 
 	subscriptionsMocks.AssertExpectations(t)
 
@@ -77,7 +77,7 @@ func TestAboutHandlerFree(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	app.ServeHTTP(resp, req)
+	app.webEngine.ServeHTTP(resp, req)
 
 	subscriptionsMocks.AssertExpectations(t)
 
