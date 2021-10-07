@@ -160,7 +160,7 @@ func TestHostsListHandler(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	app.ServeHTTP(resp, req)
+	app.webEngine.ServeHTTP(resp, req)
 
 	consulInst.AssertExpectations(t)
 	catalog.AssertExpectations(t)
@@ -319,7 +319,7 @@ func TestHostHandler(t *testing.T) {
 	}
 	req.Header.Set("Accept", "text/html")
 
-	app.ServeHTTP(resp, req)
+	app.webEngine.ServeHTTP(resp, req)
 
 	m := minify.New()
 	m.AddFunc("text/html", html.Minify)
@@ -439,7 +439,7 @@ func TestHostHandlerAzure(t *testing.T) {
 	}
 	req.Header.Set("Accept", "text/html")
 
-	app.ServeHTTP(resp, req)
+	app.webEngine.ServeHTTP(resp, req)
 
 	m := minify.New()
 	m.AddFunc("text/html", html.Minify)
@@ -483,7 +483,7 @@ func TestHostHandler404Error(t *testing.T) {
 	}
 	req.Header.Set("Accept", "text/html")
 
-	app.ServeHTTP(resp, req)
+	app.webEngine.ServeHTTP(resp, req)
 
 	assert.NoError(t, err)
 	assert.Equal(t, 404, resp.Code)

@@ -151,7 +151,7 @@ func TestSAPSystemsListHandler(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	app.ServeHTTP(resp, req)
+	app.webEngine.ServeHTTP(resp, req)
 
 	kv.AssertExpectations(t)
 	hostsService.AssertExpectations(t)
@@ -199,7 +199,7 @@ func TestSAPDatabaseListHandler(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	app.ServeHTTP(resp, req)
+	app.webEngine.ServeHTTP(resp, req)
 
 	kv.AssertExpectations(t)
 	hostsService.AssertExpectations(t)
@@ -263,7 +263,7 @@ func TestSAPResourceHandler(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	app.ServeHTTP(resp, req)
+	app.webEngine.ServeHTTP(resp, req)
 	assert.Equal(t, 200, resp.Code)
 	responseBody := minifyHtml(resp.Body.String())
 
@@ -297,7 +297,7 @@ func TestSAPResourceHandler404Error(t *testing.T) {
 	req, _ := http.NewRequest("GET", "/sapsystems/foobar", nil)
 	req.Header.Set("Accept", "text/html")
 
-	app.ServeHTTP(resp, req)
+	app.webEngine.ServeHTTP(resp, req)
 
 	sapSystemsService.AssertExpectations(t)
 

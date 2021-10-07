@@ -7,7 +7,8 @@ import (
 
 func testDependencies() Dependencies {
 	return Dependencies{
-		engine: gin.Default(),
-		store:  cookie.NewStore([]byte("secret")),
+		webEngine:       gin.Default(),
+		collectorEngine: gin.Default(),
+		store:           cookie.NewStore([]byte("secret")),
 	}
 }

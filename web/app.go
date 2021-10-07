@@ -1,16 +1,20 @@
 package web
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"embed"
 	"fmt"
-	"log"
+	"io/ioutil"
 	"net/http"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -40,7 +44,8 @@ type App struct {
 
 type Dependencies struct {
 	consul               consul.Client
-	engine               *gin.Engine
+	webEngine            *gin.Engine
+	collectorEngine      *gin.Engine
 	store                cookie.Store
 	checksService        services.ChecksService
 	subscriptionsService services.SubscriptionsService
@@ -51,7 +56,8 @@ type Dependencies struct {
 
 func DefaultDependencies() Dependencies {
 	consulClient, _ := consul.DefaultClient()
-	engine := gin.Default()
+	webEngine := gin.Default()
+	collectorEngine := gin.Default()
 	store := cookie.NewStore([]byte("secret"))
 	mode := os.Getenv(gin.EnvGinMode)
 
@@ -74,7 +80,7 @@ func DefaultDependencies() Dependencies {
 	sapSystemsService := services.NewSAPSystemsService(consulClient)
 
 	return Dependencies{
-		consulClient, engine, store,
+		consulClient, webEngine, collectorEngine, store,
 		checksService, subscriptionsService, hostsService, sapSystemsService, tagsService,
 	}
 }
@@ -127,31 +133,31 @@ func NewApp(host string, port int) (*App, error) {
 func NewAppWithDeps(host string, port int, deps Dependencies) (*App, error) {
 	app := &App{
 		Dependencies: deps,
-		host:         host,
+		host:         host, // these are web specific, we need something similar for the collector
 		port:         port,
 	}
 
 	InitAlerts()
-	engine := deps.engine
-	engine.HTMLRender = NewLayoutRender(templatesFS, "templates/*.tmpl")
-	engine.Use(ErrorHandler)
-	engine.Use(sessions.Sessions("session", deps.store))
-	engine.StaticFS("/static", http.FS(assetsFS))
-	engine.GET("/", HomeHandler)
-	engine.GET("/about", NewAboutHandler(deps.subscriptionsService))
-	engine.GET("/hosts", NewHostListHandler(deps.consul, deps.tagsService))
-	engine.GET("/hosts/:name", NewHostHandler(deps.consul, deps.subscriptionsService))
-	engine.GET("/catalog", NewChecksCatalogHandler(deps.checksService))
-	engine.GET("/clusters", NewClusterListHandler(deps.consul, deps.checksService, deps.tagsService))
-	engine.GET("/clusters/:id", NewClusterHandler(deps.consul, deps.checksService))
-	engine.POST("/clusters/:id/settings", NewSaveClusterSettingsHandler(deps.consul))
-	engine.GET("/sapsystems", NewSAPSystemListHandler(deps.consul, deps.hostsService, deps.sapSystemsService, deps.tagsService))
-	engine.GET("/sapsystems/:sid", NewSAPResourceHandler(deps.hostsService, deps.sapSystemsService))
-	engine.GET("/databases", NewHanaDatabaseListHandler(deps.consul, deps.hostsService, deps.sapSystemsService, deps.tagsService))
-	engine.GET("/databases/:sid", NewSAPResourceHandler(deps.hostsService, deps.sapSystemsService))
-	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	webEngine := deps.webEngine
+	webEngine.HTMLRender = NewLayoutRender(templatesFS, "templates/*.tmpl")
+	webEngine.Use(ErrorHandler)
+	webEngine.Use(sessions.Sessions("session", deps.store))
+	webEngine.StaticFS("/static", http.FS(assetsFS))
+	webEngine.GET("/", HomeHandler)
+	webEngine.GET("/about", NewAboutHandler(deps.subscriptionsService))
+	webEngine.GET("/hosts", NewHostListHandler(deps.consul, deps.tagsService))
+	webEngine.GET("/hosts/:name", NewHostHandler(deps.consul, deps.subscriptionsService))
+	webEngine.GET("/catalog", NewChecksCatalogHandler(deps.checksService))
+	webEngine.GET("/clusters", NewClusterListHandler(deps.consul, deps.checksService, deps.tagsService))
+	webEngine.GET("/clusters/:id", NewClusterHandler(deps.consul, deps.checksService))
+	webEngine.POST("/clusters/:id/settings", NewSaveClusterSettingsHandler(deps.consul))
+	webEngine.GET("/sapsystems", NewSAPSystemListHandler(deps.consul, deps.hostsService, deps.sapSystemsService, deps.tagsService))
+	webEngine.GET("/sapsystems/:sid", NewSAPResourceHandler(deps.hostsService, deps.sapSystemsService))
+	webEngine.GET("/databases", NewHanaDatabaseListHandler(deps.consul, deps.hostsService, deps.sapSystemsService, deps.tagsService))
+	webEngine.GET("/databases/:sid", NewSAPResourceHandler(deps.hostsService, deps.sapSystemsService))
+	webEngine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	apiGroup := engine.Group("/api")
+	apiGroup := webEngine.Group("/api")
 	{
 		apiGroup.GET("/ping", ApiPingHandler)
 
@@ -167,21 +173,70 @@ func NewAppWithDeps(host string, port int, deps Dependencies) (*App, error) {
 		apiGroup.DELETE("/databases/:sid/tags/:tag", ApiDatabaseDeleteTagHandler(deps.sapSystemsService, deps.tagsService))
 	}
 
+	collectorEngine := deps.collectorEngine
+	collectorEngine.POST("/api/collector", ApiPingHandler)
+
 	return app, nil
 }
 
 func (a *App) Start() error {
 	s := &http.Server{
 		Addr:           fmt.Sprintf("%s:%d", a.host, a.port),
-		Handler:        a,
+		Handler:        a.webEngine,
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
 	}
 
-	return s.ListenAndServe()
+	// Create a CA certificate pool and add cert.pem to it
+	caCert, err := ioutil.ReadFile("cert.pem")
+	if err != nil {
+		log.Fatal(err)
+	}
+	caCertPool := x509.NewCertPool()
+	caCertPool.AppendCertsFromPEM(caCert)
+
+	// Create the TLS Config with the CA pool and enable Client certificate validation
+	tlsConfig := &tls.Config{
+		ClientCAs:  caCertPool,
+		ClientAuth: tls.RequireAndVerifyClientCert,
+	}
+	// tlsConfig.BuildNameToCertificate()
+
+	s2 := &http.Server{
+		Addr:           fmt.Sprintf("%s:%d", a.host, 8443),
+		Handler:        a.collectorEngine,
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 1 << 20,
+		TLSConfig:      tlsConfig,
+	}
+
+	wg := new(sync.WaitGroup)
+	wg.Add(1)
+
+	go func() {
+		err = s.ListenAndServe()
+		log.Error(err)
+		wg.Done()
+	}()
+
+	go func() {
+		if viper.GetBool("disable-mtls") {
+			err = s2.ListenAndServe()
+		} else {
+			err = s2.ListenAndServeTLS("cert.pem", "key.pem")
+		}
+
+		log.Error(err)
+		wg.Done()
+	}()
+
+	wg.Wait()
+
+	return err
 }
 
 func (a *App) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	a.engine.ServeHTTP(w, req)
+	a.webEngine.ServeHTTP(w, req)
 }
