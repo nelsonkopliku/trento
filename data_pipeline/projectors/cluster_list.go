@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/trento-project/trento/datapipeline
-	"github.com/trento-project/trento/datapipelinereadmodels"
 	"github.com/trento-project/trento/internal/cluster"
+	"github.com/trento-project/trento/web/datapipeline"
+	"github.com/trento-project/trento/web/datapipeline/readmodels"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
