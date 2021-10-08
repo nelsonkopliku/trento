@@ -19,8 +19,11 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
-	dataPipelineServices "github.com/trento-project/trento/data_pipeline/services"
 	"github.com/trento-project/trento/internal/consul"
+	"github.com/trento-project/trento/web/datapipeline"
+	"github.com/trento-project/trento/web/datapipeline/projectors"
+	"github.com/trento-project/trento/web/datapipeline/readmodels"
+	dataPipelineServices "github.com/trento-project/trento/web/datapipeline/services"
 	"github.com/trento-project/trento/web/models"
 	"github.com/trento-project/trento/web/services"
 	"github.com/trento-project/trento/web/services/ara"
@@ -54,6 +57,7 @@ type Dependencies struct {
 	sapSystemsService    services.SAPSystemsService
 	tagsService          services.TagsService
 	collectorService     dataPipelineServices.CollectorService
+	clusterListService   services.ClusterListService
 }
 
 func DefaultDependencies() Dependencies {
@@ -81,11 +85,14 @@ func DefaultDependencies() Dependencies {
 	hostsService := services.NewHostsService(consulClient)
 	sapSystemsService := services.NewSAPSystemsService(consulClient)
 
-	collectorService := dataPipelineServices.NewCollectorService(db, struct{}{})
+	ch := projectors.StartProjectorsWorkerPool(10, db)
+	collectorService := dataPipelineServices.NewCollectorService(db, ch)
+
+	clusterListService := services.NewClusterList(db, checksService, tagsService)
 	return Dependencies{
 		consulClient, webEngine, collectorEngine, store,
 		checksService, subscriptionsService, hostsService, sapSystemsService, tagsService,
-		collectorService,
+		collectorService, clusterListService,
 	}
 }
 
@@ -108,7 +115,7 @@ func InitDB() (*gorm.DB, error) {
 }
 
 func MigrateDB(db *gorm.DB) error {
-	err := db.AutoMigrate(models.Tag{}, dataPipelineServices.DataCollectedEvent{})
+	err := db.AutoMigrate(models.Tag{}, datapipeline.DataCollectedEvent{}, projectors.Subscription{}, readmodels.Cluster{})
 	if err != nil {
 		return err
 	}
@@ -153,6 +160,7 @@ func NewAppWithDeps(host string, port int, deps Dependencies) (*App, error) {
 	webEngine.GET("/hosts/:name", NewHostHandler(deps.consul, deps.subscriptionsService))
 	webEngine.GET("/catalog", NewChecksCatalogHandler(deps.checksService))
 	webEngine.GET("/clusters", NewClusterListHandler(deps.consul, deps.checksService, deps.tagsService))
+	webEngine.GET("/clusters2", NewClusterListHandler2(deps.clusterListService))
 	webEngine.GET("/clusters/:id", NewClusterHandler(deps.consul, deps.checksService))
 	webEngine.POST("/clusters/:id/settings", NewSaveClusterSettingsHandler(deps.consul))
 	webEngine.GET("/sapsystems", NewSAPSystemListHandler(deps.consul, deps.hostsService, deps.sapSystemsService, deps.tagsService))

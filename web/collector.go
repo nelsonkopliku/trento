@@ -4,12 +4,13 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	dataPipelineServices "github.com/trento-project/trento/data_pipeline/services"
+	"github.com/trento-project/trento/web/datapipeline"
+	"github.com/trento-project/trento/web/datapipeline/services"
 )
 
-func ApiCollectDataHandler(collectorService dataPipelineServices.CollectorService) gin.HandlerFunc {
+func ApiCollectDataHandler(collectorService services.CollectorService) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var e dataPipelineServices.DataCollectedEvent
+		var e datapipeline.DataCollectedEvent
 
 		err := c.BindJSON(&e)
 		if err != nil {
@@ -22,7 +23,6 @@ func ApiCollectDataHandler(collectorService dataPipelineServices.CollectorServic
 			_ = c.Error(err)
 			return
 		}
-
 		c.JSON(http.StatusAccepted, gin.H{"stored": "ok"})
 	}
 }
