@@ -1,10 +1,12 @@
 package web
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
 	"path"
 	"regexp"
 	"strconv"
@@ -559,6 +561,13 @@ func TestClustersListHandler(t *testing.T) {
 }
 
 func TestClusterHandlerHANA(t *testing.T) {
+
+	a := clustersListMap()["47d1190ffb4f781974c8356d7f863b03"]
+
+	b, _ := json.Marshal(a)
+
+	err := os.WriteFile("/tmp/dat1", b, 0644)
+
 	clusterId := "47d1190ffb4f781974c8356d7f863b03"
 
 	nodes := []*consulApi.Node{

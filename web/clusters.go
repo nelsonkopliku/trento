@@ -506,6 +506,34 @@ func NewClusterListHandler(client consul.Client, s services.ChecksService, t ser
 	}
 }
 
+func NewClusterListHandler2(clusterListService services.ClusterListService) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		query := c.Request.URL.Query()
+
+		clusterList, err := clusterListService.GetAll(query)
+
+		if err != nil {
+			_ = c.Error(err)
+			return
+		}
+
+		healthContainer := &HealthContainer{}
+		healthContainer.Layout = "horizontal"
+
+		page := c.DefaultQuery("page", "1")
+		perPage := c.DefaultQuery("per_page", "10")
+		pagination := NewPaginationWithStrings(len(clusterList), page, perPage) // not nice here
+		firstElem, lastElem := pagination.GetSliceNumbers()
+
+		c.HTML(http.StatusOK, "clusters.html.tmpl", gin.H{
+			"ClustersTable":   clusterList[firstElem:lastElem],
+			"AppliedFilters":  query,
+			"Pagination":      pagination,
+			"HealthContainer": healthContainer,
+		})
+	}
+}
+
 func getChecksCatalogWithSelected(s services.ChecksService, clusterId, selectedChecks string) (models.GroupedCheckList, error) {
 	checksCatalog, err := s.GetChecksCatalogByGroup()
 	if err != nil {
