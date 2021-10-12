@@ -3,6 +3,7 @@ package discovery
 import (
 	"fmt"
 
+	"github.com/trento-project/trento/agent/collector"
 	"github.com/trento-project/trento/internal/cluster"
 	"github.com/trento-project/trento/internal/consul"
 	"github.com/trento-project/trento/internal/hosts"
@@ -12,15 +13,16 @@ const ClusterDiscoveryId string = "ha_cluster_discovery"
 
 // This Discover handles any Pacemaker Cluster type
 type ClusterDiscovery struct {
-	id        string
-	discovery BaseDiscovery
-	Cluster   cluster.Cluster
+	BaseDiscovery
+	Cluster cluster.Cluster
 }
 
-func NewClusterDiscovery(client consul.Client) ClusterDiscovery {
+func NewClusterDiscovery(client consul.Client, collectorConfig collector.CollectorConfig) ClusterDiscovery {
 	r := ClusterDiscovery{}
 	r.id = ClusterDiscoveryId
-	r.discovery = NewDiscovery(client)
+	r.client = client
+	r.collectorConfig = &collectorConfig
+	r.init()
 	return r
 }
 
@@ -37,15 +39,17 @@ func (d ClusterDiscovery) Discover() (string, error) {
 
 	d.Cluster = cluster
 
-	err = d.Cluster.Store(d.discovery.client)
+	err = d.Cluster.Store(d.client)
 	if err != nil {
 		return "", err
 	}
 
-	err = storeClusterMetadata(d.discovery.client, cluster.Name, cluster.Id)
+	err = storeClusterMetadata(d.client, cluster.Name, cluster.Id)
 	if err != nil {
 		return "", err
 	}
+
+	d.publishDiscoveredData(cluster)
 
 	return fmt.Sprintf("Cluster with name: %s successfully discovered", cluster.Name), nil
 }

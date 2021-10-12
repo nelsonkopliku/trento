@@ -13,6 +13,7 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/trento-project/trento/agent/collector"
 	"github.com/trento-project/trento/agent/discovery"
 	"github.com/trento-project/trento/internal/consul"
 	"github.com/trento-project/trento/internal/hosts"
@@ -34,15 +35,7 @@ type Config struct {
 	InstanceName    string
 	ConsulConfigDir string
 	DiscoveryPeriod time.Duration
-}
-
-func New() (*Agent, error) {
-	config, err := DefaultConfig()
-	if err != nil {
-		return nil, errors.Wrap(err, "could not create the agent configuration")
-	}
-
-	return NewWithConfig(config)
+	Collector       collector.CollectorConfig
 }
 
 // returns a new instance of Agent with the given configuration
@@ -57,6 +50,10 @@ func NewWithConfig(cfg Config) (*Agent, error) {
 		return nil, errors.Wrap(err, "could not create the consul template runner")
 	}
 
+	if err = checkDataCollectorConnectionOptions(cfg.Collector); err != nil {
+		return nil, errors.Wrap(err, "Not enough options provided to initialize connection to Data Collector")
+	}
+
 	ctx, ctxCancel := context.WithCancel(context.Background())
 
 	agent := &Agent{
@@ -65,7 +62,8 @@ func NewWithConfig(cfg Config) (*Agent, error) {
 		ctxCancel: ctxCancel,
 		consul:    client,
 		discoveries: []discovery.Discovery{
-			discovery.NewClusterDiscovery(client),
+			discovery.NewClusterDiscovery(client, cfg.Collector),
+			// discovery.NewPublishableDiscovery(discovery.NewClusterDiscovery(client), cfg.Collector),
 			discovery.NewSAPSystemsDiscovery(client),
 			discovery.NewCloudDiscovery(client),
 			discovery.NewSubscriptionDiscovery(client),
@@ -74,6 +72,28 @@ func NewWithConfig(cfg Config) (*Agent, error) {
 		templateRunner: templateRunner,
 	}
 	return agent, nil
+}
+
+func checkDataCollectorConnectionOptions(collectorConfig collector.CollectorConfig) error {
+	var err error
+
+	if !collectorConfig.Enabled {
+		return nil
+	}
+	if collectorConfig.Host == "" {
+		err = fmt.Errorf("you must provide the host of the data collector")
+	}
+	if collectorConfig.TLS.CACert == "" {
+		err = errors.Wrap(err, "you must provide a CA certificate")
+	}
+	if collectorConfig.TLS.ClientCert == "" {
+		err = errors.Wrap(err, "you must provide a Client Certificate")
+	}
+	if collectorConfig.TLS.ClientKey == "" {
+		err = errors.Wrap(err, "you must provide a Client Key")
+	}
+
+	return err
 }
 
 func DefaultConfig() (Config, error) {
@@ -99,6 +119,7 @@ func (a *Agent) Start() error {
 
 	defer func() {
 		log.Println("De-registering the agent service with Consul...")
+		// comment me to skip consul stuff
 		err := a.consul.Agent().ServiceDeregister(a.cfg.InstanceName)
 		if err != nil {
 			log.Println("An error occurred while trying to deregisterConsulService the agent service with Consul:", err)
@@ -122,10 +143,12 @@ func (a *Agent) Start() error {
 	go func(wg *sync.WaitGroup) {
 		log.Println("Starting consul-template loop...")
 		defer wg.Done()
+		// comment me to skip consul stuff
 		a.startConsulTemplate()
 		log.Println("consul-template loop stopped.")
 	}(&wg)
 
+	// comment me to skip consul stuff
 	storeAgentMetadata(a.consul, version.Version)
 
 	wg.Wait()
