@@ -90,11 +90,11 @@ func start(cmd *cobra.Command, args []string) {
 }
 
 func extractCollectorConnectionOptions() collector.CollectorConfig {
-	var config collector.CollectorConfig
-	config.Host = viper.GetString("collector-host")
-	config.Enabled = config.Host != ""
-	config.TLS.CACert = viper.GetString("collector-ca")
-	config.TLS.ClientCert = viper.GetString("collector-client-cert")
-	config.TLS.ClientKey = viper.GetString("collector-client-key")
-	return config
+
+	host := viper.GetString("collector-host")
+	caCert := viper.GetString("collector-ca")
+	clientCert := viper.GetString("collector-client-cert")
+	clientKey := viper.GetString("collector-client-key")
+
+	return collector.NewCollectorConfig(host, collector.TlsConfig{clientCert, clientKey, caCert})
 }
