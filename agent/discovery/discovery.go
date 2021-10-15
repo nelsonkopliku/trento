@@ -47,15 +47,6 @@ func (d BaseDiscovery) Discover() (string, error) {
 	return "Basic discovery example", nil
 }
 
-// Return a Host Discover instance
-func NewDiscovery(client consul.Client) BaseDiscovery {
-	r := BaseDiscovery{}
-	r.id = ""
-	r.client = client
-	r.host, _ = os.Hostname()
-	return r
-}
-
 // func NewPublishableDiscovery(inner Discovery, collectorConfig collector.CollectorConfig) Discovery {
 // 	baseDiscovery, err := inner.(BaseDiscovery)
 // 	if err {
@@ -70,7 +61,27 @@ func NewDiscovery(client consul.Client) BaseDiscovery {
 // 	// return inner
 // }
 
-func (d *BaseDiscovery) init() {
+// func NewWithDataCollectionAndLegacyConsulSupport(discovery Discovery, collectorConfig collector.CollectorConfig, client consul.Client) *BaseDiscovery {
+// 	base := discovery.(*BaseDiscovery)
+// 	base.collectorConfig = &collectorConfig
+// 	base.client = client
+// 	return base
+// }
+
+func (d *BaseDiscovery) withDataCollectionAndLegacyConsulSupport(discoveryId string, collectorConfig collector.CollectorConfig, client consul.Client) {
+	d.id = discoveryId
+	d.collectorConfig = &collectorConfig
+	d.client = client
+	d.initialize()
+}
+
+func (d *BaseDiscovery) withLegacyConsulSupport(discoveryId string, client consul.Client) {
+	d.id = discoveryId
+	d.client = client
+	d.initialize()
+}
+
+func (d *BaseDiscovery) initialize() {
 	d.host, _ = os.Hostname()
 	machineId, _ := os.ReadFile("/etc/machine-id") // what if it breaks? can it actually break?
 	d.machineId = string(machineId)

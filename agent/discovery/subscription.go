@@ -10,15 +10,13 @@ import (
 const SubscriptionDiscoveryId string = "subscription_discovery"
 
 type SubscriptionDiscovery struct {
-	id        string
-	discovery BaseDiscovery
+	BaseDiscovery
 }
 
 func NewSubscriptionDiscovery(client consul.Client) SubscriptionDiscovery {
-	r := SubscriptionDiscovery{}
-	r.id = SubscriptionDiscoveryId
-	r.discovery = NewDiscovery(client)
-	return r
+	discovery := SubscriptionDiscovery{}
+	discovery.withLegacyConsulSupport(SubscriptionDiscoveryId, client)
+	return discovery
 }
 
 func (d SubscriptionDiscovery) GetId() string {
@@ -31,7 +29,7 @@ func (d SubscriptionDiscovery) Discover() (string, error) {
 		return "", err
 	}
 
-	err = subsData.Store(d.discovery.client)
+	err = subsData.Store(d.client)
 	if err != nil {
 		return "", err
 	}

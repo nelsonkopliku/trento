@@ -18,12 +18,9 @@ type ClusterDiscovery struct {
 }
 
 func NewClusterDiscovery(client consul.Client, collectorConfig collector.CollectorConfig) ClusterDiscovery {
-	r := ClusterDiscovery{}
-	r.id = ClusterDiscoveryId
-	r.client = client
-	r.collectorConfig = &collectorConfig
-	r.init()
-	return r
+	discovery := ClusterDiscovery{}
+	discovery.withDataCollectionAndLegacyConsulSupport(ClusterDiscoveryId, collectorConfig, client)
+	return discovery
 }
 
 func (c ClusterDiscovery) GetId() string {

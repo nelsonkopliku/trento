@@ -11,15 +11,13 @@ import (
 const CloudDiscoveryId string = "cloud_discovery"
 
 type CloudDiscovery struct {
-	id        string
-	discovery BaseDiscovery
+	BaseDiscovery
 }
 
 func NewCloudDiscovery(client consul.Client) CloudDiscovery {
-	r := CloudDiscovery{}
-	r.id = CloudDiscoveryId
-	r.discovery = NewDiscovery(client)
-	return r
+	discovery := CloudDiscovery{}
+	discovery.withLegacyConsulSupport(CloudDiscoveryId, client)
+	return discovery
 }
 
 func (d CloudDiscovery) GetId() string {
@@ -32,12 +30,12 @@ func (d CloudDiscovery) Discover() (string, error) {
 		return "", err
 	}
 
-	err = cloudData.Store(d.discovery.client)
+	err = cloudData.Store(d.client)
 	if err != nil {
 		return "", err
 	}
 
-	err = storeCloudMetadata(d.discovery.client, cloudData.Provider)
+	err = storeCloudMetadata(d.client, cloudData.Provider)
 	if err != nil {
 		return "", err
 	}
