@@ -12,14 +12,12 @@ import (
 const HostDiscoveryId string = "host_discovery"
 
 type HostDiscovery struct {
-	id        string
-	discovery BaseDiscovery
+	BaseDiscovery
 }
 
 func NewHostDiscovery(client consul.Client) HostDiscovery {
 	d := HostDiscovery{}
-	d.id = HostDiscoveryId
-	d.discovery = NewDiscovery(client)
+	d.withLegacyConsulSupport(HostDiscoveryId, client)
 	return d
 }
 
@@ -37,12 +35,12 @@ func (h HostDiscovery) Discover() (string, error) {
 	metadata := hosts.Metadata{
 		HostIpAddresses: ipAddresses,
 	}
-	err = metadata.Store(h.discovery.client)
+	err = metadata.Store(h.client)
 	if err != nil {
 		return "", err
 	}
 
-	return fmt.Sprintf("Host with name: %s successfully discovered", h.discovery.host), nil
+	return fmt.Sprintf("Host with name: %s successfully discovered", h.host), nil
 }
 
 func getHostIpAddresses() (string, error) {
