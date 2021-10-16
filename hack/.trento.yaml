@@ -1,0 +1,37 @@
+Consul:
+  skipForLocalDevelopment: true
+
+ClusterDiscovery:
+  Tools:
+    cibAdminPath: toolmocks/cibadmin
+    crmmonAdmPath: toolmocks/crm_mon
+    corosyncKeyPath: toolmocks/authkey
+    SBDPath: toolmocks/sbd
+    SBDConfigPath: toolmocks/sbdconfig
+
+####################################################
+
+# Web options #
+
+db-port: 32432
+
+## Web.DataCollector options
+enable-mtls: true
+cert: ./hack/certs/dev/server-cert.pem
+key: ./hack/certs/dev/server-key.pem
+ca: ./hack/certs/dev/ca-cert.pem
+
+# End Web Options #
+
+####################################################
+
+# Agent options #
+
+# some-other-option: foobar
+
+## Agent.DataPublishing Options
+collector-host: https://localhost:8443
+collector-ca: ./hack/certs/dev/ca-cert.pem
+collector-client-key: ./hack/certs/dev/client-key.pem
+collector-client-cert: ./hack/certs/dev/client-cert.pem
+# End Agent Options #
