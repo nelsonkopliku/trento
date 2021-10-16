@@ -14,6 +14,7 @@ import (
 
 	"github.com/trento-project/trento/agent"
 	"github.com/trento-project/trento/agent/collector"
+	"github.com/trento-project/trento/internal/cluster"
 )
 
 var consulConfigDir string
@@ -67,7 +68,8 @@ func start(cmd *cobra.Command, args []string) {
 
 	cfg.ConsulConfigDir = consulConfigDir
 	cfg.DiscoveryPeriod = time.Duration(discoveryPeriod) * time.Minute
-	cfg.Collector = extractCollectorConnectionOptions()
+	cfg.ClusterDiscoveryOptions.CollectorConfig = extractCollectorConnectionOptions()
+	cfg.ClusterDiscoveryOptions.ClusterDiscoverytools = extractClusterDiscoveryTools()
 
 	a, err := agent.NewWithConfig(cfg)
 	if err != nil {
@@ -90,11 +92,22 @@ func start(cmd *cobra.Command, args []string) {
 }
 
 func extractCollectorConnectionOptions() collector.CollectorConfig {
+	return collector.NewCollectorConfig(
+		viper.GetString("collector-host"),
+		collector.TlsConfig{
+			ClientCert: viper.GetString("collector-client-cert"),
+			ClientKey:  viper.GetString("collector-client-key"),
+			CACert:     viper.GetString("collector-ca"),
+		},
+	)
+}
 
-	host := viper.GetString("collector-host")
-	caCert := viper.GetString("collector-ca")
-	clientCert := viper.GetString("collector-client-cert")
-	clientKey := viper.GetString("collector-client-key")
-
-	return collector.NewCollectorConfig(host, collector.TlsConfig{clientCert, clientKey, caCert})
+func extractClusterDiscoveryTools() cluster.DiscoveryTools {
+	return cluster.DiscoveryTools{
+		CibAdmPath:      viper.GetString("ClusterDiscovery.Tools.cibAdminPath"),
+		CrmmonAdmPath:   viper.GetString("ClusterDiscovery.Tools.crmmonAdmPath"),
+		CorosyncKeyPath: viper.GetString("ClusterDiscovery.Tools.corosyncKeyPath"),
+		SBDPath:         viper.GetString("ClusterDiscovery.Tools.SBDPath"),
+		SBDConfigPath:   viper.GetString("ClusterDiscovery.Tools.SBDConfigPath"),
+	}
 }

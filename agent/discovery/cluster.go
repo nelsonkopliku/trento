@@ -14,12 +14,19 @@ const ClusterDiscoveryId string = "ha_cluster_discovery"
 // This Discover handles any Pacemaker Cluster type
 type ClusterDiscovery struct {
 	BaseDiscovery
-	Cluster cluster.Cluster
+	dicoveryTools cluster.DiscoveryTools
+	Cluster       cluster.Cluster
 }
 
-func NewClusterDiscovery(client consul.Client, collectorConfig collector.CollectorConfig) ClusterDiscovery {
+type ClusterDiscoveryOptions struct {
+	CollectorConfig       collector.CollectorConfig
+	ClusterDiscoverytools cluster.DiscoveryTools
+}
+
+func NewClusterDiscovery(client consul.Client, options ClusterDiscoveryOptions) ClusterDiscovery {
 	discovery := ClusterDiscovery{}
-	discovery.withDataCollectionAndLegacyConsulSupport(ClusterDiscoveryId, collectorConfig, client)
+	discovery.dicoveryTools = options.ClusterDiscoverytools
+	discovery.withDataCollectionAndLegacyConsulSupport(ClusterDiscoveryId, options.CollectorConfig, client)
 	return discovery
 }
 
@@ -29,7 +36,8 @@ func (c ClusterDiscovery) GetId() string {
 
 // Execute one iteration of a discovery and store the result in the Consul KVStore.
 func (d ClusterDiscovery) Discover() (string, error) {
-	cluster, err := cluster.NewCluster()
+	cluster, err := cluster.NewCluster(d.dicoveryTools)
+
 	if err != nil {
 		return "No HA cluster discovered on this host", nil
 	}

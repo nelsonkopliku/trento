@@ -5,10 +5,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/trento-project/trento/internal"
-
 	// These packages were originally imported from github.com/ClusterLabs/ha_cluster_exporter/collector/pacemaker
 	// Now we mantain our own fork
+
+	"github.com/trento-project/trento/internal"
 	"github.com/trento-project/trento/internal/cluster/cib"
 	"github.com/trento-project/trento/internal/cluster/crmmon"
 )
@@ -25,6 +25,55 @@ const (
 	clusterNameWordCount   int    = 1
 )
 
+type DiscoveryTools struct {
+	CibAdmPath      string
+	CrmmonAdmPath   string
+	CorosyncKeyPath string
+	SBDPath         string
+	SBDConfigPath   string
+}
+
+func mergeToolsWithDefaults(discoveryTools DiscoveryTools) DiscoveryTools {
+	var tools DiscoveryTools
+
+	// cidadmin
+	if providedCibAdmPath := discoveryTools.CibAdmPath; providedCibAdmPath == "" {
+		tools.CibAdmPath = cibAdmPath
+	} else {
+		tools.CibAdmPath = providedCibAdmPath
+	}
+
+	// crmmon
+	if providedCrmmonAdmPath := discoveryTools.CrmmonAdmPath; providedCrmmonAdmPath == "" {
+		tools.CrmmonAdmPath = crmmonAdmPath
+	} else {
+		tools.CrmmonAdmPath = providedCrmmonAdmPath
+	}
+
+	// corosync authkey
+	if providedCorosyncKeyPath := discoveryTools.CorosyncKeyPath; providedCorosyncKeyPath == "" {
+		tools.CorosyncKeyPath = corosyncKeyPath
+	} else {
+		tools.CorosyncKeyPath = providedCorosyncKeyPath
+	}
+
+	// sbd executable
+	if providedSBDPath := discoveryTools.SBDPath; providedSBDPath == "" {
+		tools.SBDPath = SBDPath
+	} else {
+		tools.SBDPath = providedSBDPath
+	}
+
+	// sbd config
+	if providedSBDConfigPath := discoveryTools.SBDConfigPath; providedSBDConfigPath == "" {
+		tools.SBDConfigPath = SBDConfigPath
+	} else {
+		tools.SBDConfigPath = providedSBDConfigPath
+	}
+
+	return tools
+}
+
 type Cluster struct {
 	Cib    cib.Root    `mapstructure:"cib,omitempty"`
 	Crmmon crmmon.Root `mapstructure:"crmmon,omitempty"`
@@ -33,10 +82,12 @@ type Cluster struct {
 	Name   string      `mapstructure:"name"`
 }
 
-func NewCluster() (Cluster, error) {
+func NewCluster(tools DiscoveryTools) (Cluster, error) {
 	var cluster = Cluster{}
 
-	cibParser := cib.NewCibAdminParser(cibAdmPath)
+	discoveryTools := mergeToolsWithDefaults(tools)
+
+	cibParser := cib.NewCibAdminParser(discoveryTools.CibAdmPath)
 
 	cibConfig, err := cibParser.Parse()
 	if err != nil {
@@ -45,7 +96,7 @@ func NewCluster() (Cluster, error) {
 
 	cluster.Cib = cibConfig
 
-	crmmonParser := crmmon.NewCrmMonParser(crmmonAdmPath)
+	crmmonParser := crmmon.NewCrmMonParser(discoveryTools.CrmmonAdmPath)
 
 	crmmonConfig, err := crmmonParser.Parse()
 	if err != nil {
@@ -55,7 +106,7 @@ func NewCluster() (Cluster, error) {
 	cluster.Crmmon = crmmonConfig
 
 	// Set MD5-hashed key based on the corosync auth key
-	cluster.Id, err = getCorosyncAuthkeyMd5(corosyncKeyPath)
+	cluster.Id, err = getCorosyncAuthkeyMd5(discoveryTools.CorosyncKeyPath)
 	if err != nil {
 		return cluster, err
 	}
@@ -63,7 +114,7 @@ func NewCluster() (Cluster, error) {
 	cluster.Name = getName(cluster)
 
 	if cluster.IsFencingSBD() {
-		sbdData, err := NewSBD(cluster.Id, SBDPath, SBDConfigPath)
+		sbdData, err := NewSBD(cluster.Id, discoveryTools.SBDPath, discoveryTools.SBDConfigPath)
 		if err != nil {
 			return cluster, err
 		}

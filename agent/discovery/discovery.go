@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/trento-project/trento/agent/collector"
@@ -94,6 +95,11 @@ func (d *BaseDiscovery) initialize() {
 
 func (d BaseDiscovery) publishDiscoveredData(discoveredData interface{}) error {
 	collectorConfig := d.collectorConfig
+
+	if err := checkDataCollectorConnectionOptions(*collectorConfig); err != nil {
+		return errors.Wrap(err, "Not enough options provided to initialize connection to Data Collector")
+	}
+
 	if !collectorConfig.Enabled {
 		return nil
 	}
@@ -141,4 +147,26 @@ func (d BaseDiscovery) publishDiscoveredData(discoveredData interface{}) error {
 	body, _ := ioutil.ReadAll(resp.Body)
 	fmt.Println("response Body:", string(body))
 	return nil
+}
+
+func checkDataCollectorConnectionOptions(collectorConfig collector.CollectorConfig) error {
+	var err error
+
+	if !collectorConfig.Enabled {
+		return nil
+	}
+	if collectorConfig.Host == "" {
+		err = fmt.Errorf("you must provide the host of the data collector")
+	}
+	if collectorConfig.TLS.CACert == "" {
+		err = errors.Wrap(err, "you must provide a CA certificate")
+	}
+	if collectorConfig.TLS.ClientCert == "" {
+		err = errors.Wrap(err, "you must provide a Client Certificate")
+	}
+	if collectorConfig.TLS.ClientKey == "" {
+		err = errors.Wrap(err, "you must provide a Client Key")
+	}
+
+	return err
 }
