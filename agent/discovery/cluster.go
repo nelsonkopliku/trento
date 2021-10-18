@@ -3,6 +3,7 @@ package discovery
 import (
 	"fmt"
 
+	"github.com/trento-project/trento/agent/collector"
 	"github.com/trento-project/trento/internal/cluster"
 	"github.com/trento-project/trento/internal/consul"
 	"github.com/trento-project/trento/internal/hosts"
@@ -17,11 +18,11 @@ type ClusterDiscovery struct {
 	Cluster   cluster.Cluster
 }
 
-func NewClusterDiscovery(client consul.Client) ClusterDiscovery {
-	r := ClusterDiscovery{}
-	r.id = ClusterDiscoveryId
-	r.discovery = NewDiscovery(client)
-	return r
+func NewClusterDiscovery(client consul.Client, collectorClient collector.CollectorClient) ClusterDiscovery {
+	d := ClusterDiscovery{}
+	d.id = ClusterDiscoveryId
+	d.discovery = NewDiscoveryWithCollector(client, collectorClient)
+	return d
 }
 
 func (c ClusterDiscovery) GetId() string {
