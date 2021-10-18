@@ -20,7 +20,9 @@ import (
 var consulConfigDir string
 var discoveryPeriod int
 
+var enablemTLS bool
 var collectorHost string
+var collectorPort int
 var cert string
 var key string
 var ca string
@@ -40,7 +42,9 @@ func NewAgentCmd() *cobra.Command {
 	startCmd.Flags().StringVarP(&consulConfigDir, "consul-config-dir", "", "consul.d", "Consul configuration directory used to store node meta-data")
 	startCmd.Flags().IntVarP(&discoveryPeriod, "discovery-period", "", 2, "Discovery mechanism loop period on minutes")
 
-	startCmd.Flags().StringVar(&collectorHost, "collector-host", "https://localhost:8443", "Data Collector endpoint")
+	startCmd.Flags().BoolVar(&enablemTLS, "enable-mtls", false, "Enable mTLS authentication between server and agent")
+	startCmd.Flags().StringVar(&collectorHost, "collector-host", "localhost", "Data Collector endpoint")
+	startCmd.Flags().IntVar(&collectorPort, "collector-port", 8443, "Data Collector port")
 	startCmd.Flags().StringVar(&cert, "collector-client-cert", "", "mTLS client certificate")
 	startCmd.Flags().StringVar(&key, "collector-client-key", "", "mTLS client key")
 	startCmd.Flags().StringVar(&ca, "collector-ca", "", "mTLS Certificate Authority")
@@ -94,6 +98,7 @@ func start(cmd *cobra.Command, args []string) {
 func extractCollectorConnectionOptions() collector.CollectorConfig {
 	return collector.NewCollectorConfig(
 		viper.GetString("collector-host"),
+		viper.GetInt("collector-port"),
 		collector.TlsConfig{
 			ClientCert: viper.GetString("collector-client-cert"),
 			ClientKey:  viper.GetString("collector-client-key"),

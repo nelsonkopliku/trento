@@ -59,7 +59,6 @@ func NewWithConfig(cfg Config) (*Agent, error) {
 		consul:    client,
 		discoveries: []discovery.Discovery{
 			discovery.NewClusterDiscovery(client, cfg.ClusterDiscoveryOptions),
-			// discovery.NewPublishableDiscovery(discovery.NewClusterDiscovery(client), cfg.Collector),
 			discovery.NewSAPSystemsDiscovery(client),
 			discovery.NewCloudDiscovery(client),
 			discovery.NewSubscriptionDiscovery(client),

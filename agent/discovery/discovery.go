@@ -24,12 +24,6 @@ type Discovery interface {
 	Discover() (string, error)
 }
 
-// type PublishableDiscovery interface {
-// 	Discovery
-// 	// Enables this Discovery to publish data to the Data Collector
-// 	WithDataCollectorConfig(collectorConfig collector.CollectorConfig) Discovery
-// }
-
 type BaseDiscovery struct {
 	id              string
 	client          consul.Client
@@ -48,32 +42,15 @@ func (d BaseDiscovery) Discover() (string, error) {
 	return "Basic discovery example", nil
 }
 
-// func NewPublishableDiscovery(inner Discovery, collectorConfig collector.CollectorConfig) Discovery {
-// 	baseDiscovery, err := inner.(BaseDiscovery)
-// 	if err {
-// 		return inner
-// 	}
-
-// 	return baseDiscovery.withDataCollectorConfig(collectorConfig)
-// 	// switch innerDiscovery := inner.(type) {
-// 	// case BaseDiscovery:
-// 	// 	return innerDiscovery.withDataCollectorConfig(collectorConfig)
-// 	// }
-// 	// return inner
-// }
-
-// func NewWithDataCollectionAndLegacyConsulSupport(discovery Discovery, collectorConfig collector.CollectorConfig, client consul.Client) *BaseDiscovery {
-// 	base := discovery.(*BaseDiscovery)
-// 	base.collectorConfig = &collectorConfig
-// 	base.client = client
-// 	return base
-// }
-
 func (d *BaseDiscovery) withDataCollectionAndLegacyConsulSupport(discoveryId string, collectorConfig collector.CollectorConfig, client consul.Client) {
 	d.id = discoveryId
 	d.collectorConfig = &collectorConfig
 	d.client = client
 	d.initialize()
+
+	// if err := checkDataCollectorConnectionOptions(*d.collectorConfig); err != nil {
+	// 	return errors.Wrap(err, "Not enough options provided to initialize connection to Data Collector")
+	// }
 }
 
 func (d *BaseDiscovery) withLegacyConsulSupport(discoveryId string, client consul.Client) {
@@ -87,11 +64,6 @@ func (d *BaseDiscovery) initialize() {
 	machineId, _ := os.ReadFile("/etc/machine-id") // what if it breaks? can it actually break?
 	d.machineId = string(machineId)
 }
-
-// func (d BaseDiscovery) withDataCollectorConfig(collectorConfig collector.CollectorConfig) Discovery {
-// 	d.collectorConfig = &collectorConfig
-// 	return d
-// }
 
 func (d BaseDiscovery) publishDiscoveredData(discoveredData interface{}) error {
 	collectorConfig := d.collectorConfig
@@ -132,10 +104,10 @@ func (d BaseDiscovery) publishDiscoveredData(discoveredData interface{}) error {
 		"payload":        discoveredData,
 	})
 	if err != nil {
-		log.Error("unable to decode data")
+		log.Errorf("unable to decode data: %s", err)
 	}
 
-	endpoint := fmt.Sprintf("%s/api/collect_data", collectorConfig.Host)
+	endpoint := fmt.Sprintf("https://%s:%d/api/collect_data", collectorConfig.Host, collectorConfig.Port)
 
 	resp, err := client.Post(endpoint, "application/json", bytes.NewBuffer(requestBody))
 

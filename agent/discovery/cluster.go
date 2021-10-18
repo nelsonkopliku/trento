@@ -3,6 +3,7 @@ package discovery
 import (
 	"fmt"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/trento-project/trento/agent/collector"
 	"github.com/trento-project/trento/internal/cluster"
 	"github.com/trento-project/trento/internal/consul"
@@ -54,7 +55,9 @@ func (d ClusterDiscovery) Discover() (string, error) {
 		return "", err
 	}
 
-	d.publishDiscoveredData(cluster)
+	if err := d.publishDiscoveredData(cluster); err != nil {
+		log.Errorf("Unable to publish cluster discovery data: %s", err)
+	}
 
 	return fmt.Sprintf("Cluster with name: %s successfully discovered", cluster.Name), nil
 }
