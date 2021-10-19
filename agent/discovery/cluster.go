@@ -3,6 +3,7 @@ package discovery
 import (
 	"fmt"
 
+	"github.com/spf13/viper"
 	"github.com/trento-project/trento/agent/collector"
 	"github.com/trento-project/trento/internal/cluster"
 	"github.com/trento-project/trento/internal/consul"
@@ -46,6 +47,13 @@ func (d ClusterDiscovery) Discover() (string, error) {
 	err = storeClusterMetadata(d.discovery.client, cluster.Name, cluster.Id)
 	if err != nil {
 		return "", err
+	}
+
+	if viper.GetBool("data-collector-enabled") {
+		err = d.discovery.collectorClient.Publish(d.id, cluster)
+		if err != nil {
+			return "", err
+		}
 	}
 
 	return fmt.Sprintf("Cluster with name: %s successfully discovered", cluster.Name), nil

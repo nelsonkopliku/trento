@@ -71,7 +71,12 @@ func (c *collectorClient) Publish(discoveryType string, payload interface{}) err
 		return err
 	}
 
-	endpoint := fmt.Sprintf("%s/api/collect_data", c.cfg.CollectorHost)
+	protocol := "http"
+	if c.cfg.EnablemTLS {
+		protocol = "https"
+	}
+
+	endpoint := fmt.Sprintf("%s:%s/api/collect_data", protocol, c.cfg.CollectorHost)
 	resp, err := c.httpClient.Post(endpoint, "application/json", bytes.NewBuffer(requestBody))
 	if err != nil {
 		return err

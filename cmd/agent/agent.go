@@ -19,7 +19,6 @@ import (
 var consulConfigDir string
 var discoveryPeriod int
 
-var enableDataCollection bool
 var collectorHost string
 var collectorPort int
 
@@ -43,7 +42,6 @@ func NewAgentCmd() *cobra.Command {
 	startCmd.Flags().StringVarP(&consulConfigDir, "consul-config-dir", "", "consul.d", "Consul configuration directory used to store node meta-data")
 	startCmd.Flags().IntVarP(&discoveryPeriod, "discovery-period", "", 2, "Discovery mechanism loop period on minutes")
 
-	startCmd.Flags().BoolVar(&enableDataCollection, "enable-data-collection", false, "Enable new data collection endpoint")
 	startCmd.Flags().StringVar(&collectorHost, "collector-host", "localhost", "Data Collector host")
 	startCmd.Flags().IntVar(&collectorPort, "collector-port", 8443, "Data Collector port")
 
@@ -76,12 +74,12 @@ func start(cmd *cobra.Command, args []string) {
 	cfg.ConsulConfigDir = consulConfigDir
 	cfg.DiscoveryPeriod = time.Duration(discoveryPeriod) * time.Minute
 	cfg.CollectorConfig = collector.Config{
-		CollectorHost: collectorHost,
-		CollectorPort: collectorPort,
-		EnablemTLS:    enablemTLS,
-		Cert:          cert,
-		Key:           key,
-		CA:            ca,
+		CollectorHost: viper.GetString("collector-host"),
+		CollectorPort: viper.GetInt("collector-port"),
+		EnablemTLS:    viper.GetBool("enable-mtls"),
+		Cert:          viper.GetString("cert"),
+		Key:           viper.GetString("key"),
+		CA:            viper.GetString("ca"),
 	}
 
 	a, err := agent.NewWithConfig(cfg)
