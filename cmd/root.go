@@ -10,6 +10,8 @@ import (
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 
+	tNext "github.com/trento-project/trento/tnext/cmd"
+
 	"github.com/trento-project/trento/cmd/agent"
 	"github.com/trento-project/trento/cmd/runner"
 	"github.com/trento-project/trento/cmd/web"
@@ -44,6 +46,7 @@ func init() {
 	rootCmd.AddCommand(web.NewWebCmd())
 	rootCmd.AddCommand(agent.NewAgentCmd())
 	rootCmd.AddCommand(runner.NewRunnerCmd())
+	rootCmd.AddCommand(tNext.NewTNextCmd())
 }
 
 // initConfig reads in config file and ENV variables if set.
