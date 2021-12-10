@@ -80,38 +80,6 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-CONSUL_VERSION=1.9.6
-CONSUL_PATH=/srv/consul
-CONFIG_PATH="$CONSUL_PATH/consul.d"
-CONSUL_HCL_TEMPLATE='data_dir = "/srv/consul/data/"
-log_level = "DEBUG"
-datacenter = "dc1"
-ui = true
-bind_addr = "@BIND_ADDR@"
-client_addr = "0.0.0.0"
-retry_join = ["@JOIN_ADDR@"]'
-
-CONSUL_SERVICE_NAME="consul.service"
-CONSUL_SERVICE_TEMPLATE='[Unit]
-Description="HashiCorp Consul - A service mesh solution"
-Documentation=https://www.consul.io/
-Requires=network-online.target
-After=network-online.target
-ConditionFileNotEmpty=@CONFIG_PATH@/consul.hcl
-PartOf=trento-agent.service
-
-[Service]
-ExecStart=/srv/consul/consul agent -config-dir=@CONFIG_PATH@
-ExecReload=/bin/kill --signal HUP $MAINPID
-KillMode=process
-Restart=on-failure
-RestartSec=5
-Type=notify
-
-
-[Install]
-WantedBy=multi-user.target'
-
 AGENT_CONFIG_PATH="/etc/trento"
 AGENT_CONFIG_FILE="$AGENT_CONFIG_PATH/agent.yaml"
 AGENT_CONFIG_TEMPLATE='
@@ -247,8 +215,6 @@ function setup_trento() {
 
 check_installer_deps
 configure_installation
-install_consul
-setup_consul
 install_trento
 setup_trento
 

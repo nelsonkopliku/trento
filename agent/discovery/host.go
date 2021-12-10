@@ -4,14 +4,12 @@ import (
 	"fmt"
 	"net"
 	"strconv"
-	"strings"
 
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/host"
 	"github.com/shirou/gopsutil/mem"
 	log "github.com/sirupsen/logrus"
 	"github.com/trento-project/trento/agent/discovery/collector"
-	"github.com/trento-project/trento/internal/consul"
 	"github.com/trento-project/trento/internal/hosts"
 	"github.com/trento-project/trento/version"
 )
@@ -36,17 +34,9 @@ func (h HostDiscovery) GetId() string {
 	return h.id
 }
 
-// Execute one iteration of a discovery and store the result in the Consul KVStore.
+// Execute one iteration of a discovery and publish to the collector
 func (h HostDiscovery) Discover() (string, error) {
 	ipAddresses, err := getHostIpAddresses()
-	if err != nil {
-		return "", err
-	}
-
-	metadata := hosts.Metadata{
-		HostIpAddresses: strings.Join(ipAddresses, ","),
-	}
-	err = metadata.Store(h.discovery.consulClient)
 	if err != nil {
 		return "", err
 	}
