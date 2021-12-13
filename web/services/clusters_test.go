@@ -30,6 +30,7 @@ func (suite *ClustersServiceTestSuite) SetupSuite() {
 
 	suite.db.AutoMigrate(entities.Cluster{}, entities.Host{}, models.Tag{}, models.SelectedChecks{}, models.ConnectionSettings{})
 	loadClustersFixtures(suite.db)
+	loadClustersSettingsFixtures(suite.db)
 }
 
 func (suite *ClustersServiceTestSuite) TearDownSuite() {
@@ -275,8 +276,6 @@ func (suite *ClustersServiceTestSuite) TestClustersService_GetAllClustersSetting
 	checksService := NewChecksService(mockAra, suite.db)
 	suite.clustersService = NewClustersService(suite.db, checksService)
 
-	loadClustersSettingsFixtures(suite.db)
-
 	clustersSettings, err := suite.clustersService.GetAllClustersSettings()
 	suite.NoError(err)
 	suite.NotEmpty(clustersSettings)
@@ -289,8 +288,6 @@ func (suite *ClustersServiceTestSuite) TestClustersService_GetClusterSettings() 
 	mockAra := new(araMocks.AraService)
 	checksService := NewChecksService(mockAra, suite.db)
 	suite.clustersService = NewClustersService(suite.db, checksService)
-
-	loadClustersSettingsFixtures(suite.db)
 
 	clusterSettings, err := suite.clustersService.GetClusterSettingsByID("1")
 	suite.NoError(err)
@@ -310,8 +307,6 @@ func (suite *ClustersServiceTestSuite) TestClustersService_GetClusterSettings_No
 	mockAra := new(araMocks.AraService)
 	checksService := NewChecksService(mockAra, suite.db)
 	suite.clustersService = NewClustersService(suite.db, checksService)
-
-	loadClustersSettingsFixtures(suite.db)
 
 	clusterSettings, err := suite.clustersService.GetClusterSettingsByID("not_found")
 	suite.NoError(err)
