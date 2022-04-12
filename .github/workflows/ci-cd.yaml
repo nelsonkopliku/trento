@@ -40,14 +40,14 @@ jobs:
       - uses: actions/setup-node@v3.1.0
         with:
           node-version: "15"
-      - uses: actions/cache@v3.0.1
+      - uses: actions/cache@v3.0.2
         id: go-cache
         with:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
-      - uses: actions/cache@v3.0.1
+      - uses: actions/cache@v3.0.2
         id: npm-cache
         with:
           path: ~/.npm
@@ -74,7 +74,7 @@ jobs:
       - uses: actions/setup-python@v3
         with:
           python-version: 3.7
-      - uses: actions/cache@v3.0.1
+      - uses: actions/cache@v3.0.2
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-python-${{ hashFiles('requirements.dev.txt') }}
@@ -272,14 +272,14 @@ jobs:
       - uses: actions/setup-node@v3.1.0
         with:
           node-version: "15"
-      - uses: actions/cache@v3.0.1
+      - uses: actions/cache@v3.0.2
         id: go-cache
         with:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
-      - uses: actions/cache@v3.0.1
+      - uses: actions/cache@v3.0.2
         id: npm-cache
         with:
           path: ~/.npm
