@@ -5,7 +5,7 @@ go 1.16
 require (
 	github.com/avast/retry-go/v4 v4.0.5
 	github.com/gin-contrib/sessions v0.0.5
-	github.com/gin-gonic/gin v1.7.7
+	github.com/gin-gonic/gin v1.8.0
 	github.com/gomarkdown/markdown v0.0.0-20210514010506-3b9f47219fe7
 	github.com/google/uuid v1.3.0
 	github.com/hooklift/gowsdl v0.5.0
@@ -26,7 +26,6 @@ require (
 	github.com/swaggo/swag v1.8.2
 	github.com/tdewolff/minify/v2 v2.11.5
 	github.com/tklauser/go-sysconf v0.3.9 // indirect
-	github.com/ugorji/go v1.1.13 // indirect
 	github.com/vektra/mockery/v2 v2.12.3
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	golang.org/x/sync v0.0.0-20220513210516-0976fa681c29
