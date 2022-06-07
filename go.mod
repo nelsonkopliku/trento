@@ -5,7 +5,7 @@ go 1.16
 require (
 	github.com/avast/retry-go/v4 v4.0.5
 	github.com/gin-contrib/sessions v0.0.5
-	github.com/gin-gonic/gin v1.8.0
+	github.com/gin-gonic/gin v1.8.1
 	github.com/gomarkdown/markdown v0.0.0-20210514010506-3b9f47219fe7
 	github.com/google/uuid v1.3.0
 	github.com/hooklift/gowsdl v0.5.0
