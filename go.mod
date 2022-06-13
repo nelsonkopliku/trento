@@ -3,7 +3,7 @@ module github.com/trento-project/trento
 go 1.16
 
 require (
-	github.com/avast/retry-go/v4 v4.0.5
+	github.com/avast/retry-go/v4 v4.1.0
 	github.com/gin-contrib/sessions v0.0.5
 	github.com/gin-gonic/gin v1.8.1
 	github.com/gomarkdown/markdown v0.0.0-20210514010506-3b9f47219fe7
@@ -21,8 +21,8 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.12.0
 	github.com/stretchr/testify v1.7.2
-	github.com/swaggo/files v0.0.0-20210815190702-a29dd2bc99b2
-	github.com/swaggo/gin-swagger v1.4.3
+	github.com/swaggo/files v0.0.0-20220610200504-28940afbdbfe
+	github.com/swaggo/gin-swagger v1.5.0
 	github.com/swaggo/swag v1.8.2
 	github.com/tdewolff/minify/v2 v2.11.7
 	github.com/tklauser/go-sysconf v0.3.9 // indirect
