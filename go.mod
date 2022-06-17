@@ -23,7 +23,7 @@ require (
 	github.com/stretchr/testify v1.7.2
 	github.com/swaggo/files v0.0.0-20220610200504-28940afbdbfe
 	github.com/swaggo/gin-swagger v1.5.0
-	github.com/swaggo/swag v1.8.2
+	github.com/swaggo/swag v1.8.3
 	github.com/tdewolff/minify/v2 v2.11.10
 	github.com/tklauser/go-sysconf v0.3.9 // indirect
 	github.com/vektra/mockery/v2 v2.12.3
