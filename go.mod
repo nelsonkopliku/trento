@@ -26,7 +26,7 @@ require (
 	github.com/swaggo/swag v1.8.3
 	github.com/tdewolff/minify/v2 v2.11.11
 	github.com/tklauser/go-sysconf v0.3.9 // indirect
-	github.com/vektra/mockery/v2 v2.12.3
+	github.com/vektra/mockery/v2 v2.13.1
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	golang.org/x/sync v0.0.0-20220513210516-0976fa681c29
 	gorm.io/datatypes v1.0.2
