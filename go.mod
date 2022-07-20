@@ -15,7 +15,7 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/pkg/errors v0.9.1
 	github.com/shirou/gopsutil v3.21.11+incompatible
-	github.com/sirupsen/logrus v1.8.1
+	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/afero v1.9.2
 	github.com/spf13/cobra v1.5.0
 	github.com/spf13/pflag v1.0.5
@@ -23,7 +23,7 @@ require (
 	github.com/stretchr/testify v1.8.0
 	github.com/swaggo/files v0.0.0-20220610200504-28940afbdbfe
 	github.com/swaggo/gin-swagger v1.5.1
-	github.com/swaggo/swag v1.8.3
+	github.com/swaggo/swag v1.8.4
 	github.com/tdewolff/minify/v2 v2.12.0
 	github.com/tklauser/go-sysconf v0.3.9 // indirect
 	github.com/vektra/mockery/v2 v2.12.3
