@@ -10,7 +10,7 @@
     "axios": "^0.27.2",
     "bootstrap": "^4.6.1",
     "bootstrap-select": "^1.13.18",
-    "classnames": "^2.3.1",
+    "classnames": "^2.3.2",
     "eos-ds": "^5.0.0",
     "eos-icons": "^5.4.0",
     "jquery": "^3.6.1",
@@ -18,7 +18,7 @@
     "react-bootstrap": "^1.6.4",
     "react-dom": "^18.2.0",
     "react-toastify": "^8.2.0",
-    "sass": "^1.54.9"
+    "sass": "^1.55.0"
   },
   "devDependencies": {
     "@babel/core": "^7.19.1",
