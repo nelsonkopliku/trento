@@ -116,7 +116,7 @@ jobs:
           chmod +x /tmp/photofinish
           tar -C /tmp/ -xzf /tmp/trento-amd64.tgz
       - name: Cypress run
-        uses: cypress-io/github-action@v2
+        uses: cypress-io/github-action@v4
         env:
           cypress_db_host: postgres
           cypress_db_port: 5432
