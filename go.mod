@@ -31,7 +31,7 @@ require (
 	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
 	gorm.io/datatypes v1.0.2
 	gorm.io/driver/postgres v1.1.2
-	gorm.io/gorm v1.21.15
+	gorm.io/gorm v1.24.2
 )
 
 replace github.com/trento-project/trento => ./
