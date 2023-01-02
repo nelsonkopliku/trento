@@ -28,10 +28,10 @@ require (
 	github.com/tklauser/go-sysconf v0.3.9 // indirect
 	github.com/vektra/mockery/v2 v2.12.3
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
-	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
+	golang.org/x/sync v0.0.0-20220923202941-7f9b1623fab7
 	gorm.io/datatypes v1.0.2
-	gorm.io/driver/postgres v1.1.2
-	gorm.io/gorm v1.21.15
+	gorm.io/driver/postgres v1.4.6
+	gorm.io/gorm v1.24.2
 )
 
 replace github.com/trento-project/trento => ./
